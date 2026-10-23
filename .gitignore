@@ -16,3 +16,6 @@ logs/
 
 # User / environment files
 .user.yml
+
+# Compressed archives
+*.zip
