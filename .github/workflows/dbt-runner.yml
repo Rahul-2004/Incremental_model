@@ -1,0 +1,54 @@
+name: dbt Runner
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  run-dbt-project:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out dbt project
+        uses: actions/checkout@v4
+        with:
+          path: project
+
+      - name: Check out dbt Runner
+        uses: actions/checkout@v4
+        with:
+          repository: Rahul-Kea/DbtRunner
+          ref: main
+          path: dbt-runner
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install runner and dbt dependencies
+        run: python -m pip install -r dbt-runner/requirements.txt
+
+      - name: Create temporary DuckDB database
+        env:
+          DB_PATH: ${{ runner.temp }}/execution.duckdb
+        run: python -c 'import duckdb, os; duckdb.connect(os.environ["DB_PATH"]).close()'
+
+      - name: Run dbt project
+        env:
+          PYTHONPATH: ${{ github.workspace }}/dbt-runner/src
+        run: >-
+          python -m dbt_runner
+          --project-dir "$GITHUB_WORKSPACE/project"
+          --database "$RUNNER_TEMP/execution.duckdb"
+          --non-interactive
+
+      - name: Upload runner report and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dbt-runner-report
+          path: dbt-runner/run_logs/
+          if-no-files-found: ignore
