@@ -1,0 +1,7 @@
+department_store:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: 'department_store.duckdb'
+      threads: 1

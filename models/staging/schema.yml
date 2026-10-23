@@ -1,0 +1,170 @@
+version: 2
+
+models:
+  - name: stg_department_store__sales
+    description: "Staging view containing cleaned department store sales transactions simulated via SQL CTEs."
+    columns:
+      - name: sale_id
+        description: "Primary key of the department store transaction."
+        tests:
+          - unique
+          - not_null
+      - name: store_id
+        description: "Identifier of the department store branch."
+        tests:
+          - not_null
+      - name: store_name
+        description: "Human-readable name of the store location."
+      - name: department_name
+        description: "Store department (e.g., Apparel, Cosmetics, Home Goods, Footwear, Electronics, Jewelry)."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Apparel', 'Cosmetics', 'Home Goods', 'Footwear', 'Electronics', 'Jewelry']
+      - name: customer_id
+        description: "Identifier of the customer."
+        tests:
+          - not_null
+      - name: product_id
+        description: "Identifier of the product purchased."
+      - name: product_name
+        description: "Name of the item purchased."
+      - name: quantity
+        description: "Quantity of items sold."
+      - name: unit_price
+        description: "Unit price of the item in USD."
+      - name: gross_amount
+        description: "Gross transaction amount before discounts."
+      - name: discount_amount
+        description: "Discount applied to the transaction."
+      - name: net_amount
+        description: "Net revenue from the transaction (gross - discount)."
+      - name: payment_method
+        description: "Payment method used (e.g., Credit Card, Debit Card, Mobile Payment, Gift Card)."
+      - name: sale_timestamp
+        description: "Original timestamp when the transaction occurred."
+        tests:
+          - not_null
+      - name: updated_at
+        description: "Timestamp when the record was last modified. Used as the incremental watermark."
+        tests:
+          - not_null
+
+  - name: stg_department_store__returns
+    description: "Staging view containing department store customer returns and refund events simulated via SQL CTEs."
+    columns:
+      - name: return_id
+        description: "Primary key of the return event."
+        tests:
+          - unique
+          - not_null
+      - name: sale_id
+        description: "Reference to the original sale transaction."
+        tests:
+          - not_null
+      - name: store_id
+        description: "Store location where the return was processed."
+        tests:
+          - not_null
+      - name: department_name
+        description: "Department associated with the returned product."
+        tests:
+          - not_null
+      - name: customer_id
+        description: "Identifier of customer who initiated the return."
+        tests:
+          - not_null
+      - name: refund_amount
+        description: "Amount refunded to customer."
+        tests:
+          - not_null
+      - name: restock_status
+        description: "Disposition of returned item (Restocked, Pending Inspection, Returned to Vendor)."
+        tests:
+          - not_null
+      - name: return_timestamp
+        description: "When the return transaction took place."
+        tests:
+          - not_null
+      - name: updated_at
+        description: "Modification timestamp for incremental watermark."
+        tests:
+          - not_null
+
+  - name: stg_department_store__inventory
+    description: "Staging view containing department store stock movements and replenishment events simulated via SQL CTEs."
+    columns:
+      - name: movement_id
+        description: "Primary key of the inventory movement event."
+        tests:
+          - unique
+          - not_null
+      - name: store_id
+        description: "Store branch where the inventory adjustment occurred."
+        tests:
+          - not_null
+      - name: department_name
+        description: "Department associated with the inventory movement."
+        tests:
+          - not_null
+      - name: product_id
+        description: "Identifier of the item adjusted."
+        tests:
+          - not_null
+      - name: movement_type
+        description: "Type of inventory movement (Receipt/Restock, Floor Replenishment, Damaged Write-off, etc.)."
+        tests:
+          - not_null
+      - name: quantity_change
+        description: "Units added (positive) or removed (negative) from stock."
+        tests:
+          - not_null
+      - name: movement_timestamp
+        description: "When the stock movement took place."
+        tests:
+          - not_null
+      - name: updated_at
+        description: "Modification timestamp for incremental watermark."
+        tests:
+          - not_null
+
+  - name: stg_department_store__customer_loyalty
+    description: "Staging view containing department store customer loyalty points earn/redeem transactions."
+    columns:
+      - name: loyalty_txn_id
+        description: "Primary key of the loyalty transaction event."
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: "Identifier of the loyalty rewards member."
+        tests:
+          - not_null
+      - name: sale_id
+        description: "Associated retail sale transaction ID."
+        tests:
+          - not_null
+      - name: store_id
+        description: "Store where the loyalty event was recorded."
+        tests:
+          - not_null
+      - name: tier_level
+        description: "Customer tier status (Classic, Silver, Gold, Platinum)."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Classic', 'Silver', 'Gold', 'Platinum']
+      - name: points_earned
+        description: "Reward points accrued from purchase."
+        tests:
+          - not_null
+      - name: loyalty_timestamp
+        description: "Timestamp of loyalty transaction."
+        tests:
+          - not_null
+      - name: updated_at
+        description: "Modification timestamp for incremental watermark."
+        tests:
+          - not_null

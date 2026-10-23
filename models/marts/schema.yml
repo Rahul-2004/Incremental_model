@@ -1,0 +1,186 @@
+version: 2
+
+models:
+  - name: fct_department_store_sales
+    description: "Incremental marts fact table storing department store transactions with deduplication and upsert handling."
+    columns:
+      - name: sale_id
+        description: "Unique identifier of the department store transaction (Primary Key)."
+        tests:
+          - unique
+          - not_null
+      - name: store_id
+        description: "Identifier of the department store branch."
+        tests:
+          - not_null
+      - name: store_name
+        description: "Store name / location description."
+      - name: department_name
+        description: "Department where the sale occurred (e.g. Apparel, Cosmetics, Home Goods, Footwear, Electronics, Jewelry)."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Apparel', 'Cosmetics', 'Home Goods', 'Footwear', 'Electronics', 'Jewelry']
+      - name: customer_id
+        description: "Customer identifier."
+        tests:
+          - not_null
+      - name: product_id
+        description: "Product identifier."
+      - name: product_name
+        description: "Name of the item sold."
+      - name: quantity
+        description: "Units purchased."
+      - name: unit_price
+        description: "Price per unit."
+      - name: gross_amount
+        description: "Gross price (quantity * unit_price)."
+      - name: discount_amount
+        description: "Promotional or loyalty discount applied."
+      - name: net_amount
+        description: "Net revenue realized from the sale."
+      - name: payment_method
+        description: "Tender used to complete the purchase."
+      - name: sale_timestamp
+        description: "Date and time when the transaction took place."
+        tests:
+          - not_null
+      - name: updated_at
+        description: "Last modification timestamp used for the incremental high-watermark."
+        tests:
+          - not_null
+      - name: dbt_loaded_at
+        description: "Timestamp indicating when dbt processed and loaded this row into the marts layer."
+        tests:
+          - not_null
+
+  - name: fct_department_store_returns
+    description: "Incremental marts fact table capturing customer returns, refunds, and restock status."
+    columns:
+      - name: return_id
+        description: "Unique identifier of the customer return event (Primary Key)."
+        tests:
+          - unique
+          - not_null
+      - name: sale_id
+        description: "Reference to the original sale transaction."
+        tests:
+          - not_null
+      - name: store_id
+        description: "Store location where the return was initiated."
+        tests:
+          - not_null
+      - name: department_name
+        description: "Department associated with the returned product."
+        tests:
+          - not_null
+      - name: customer_id
+        description: "Customer who returned the merchandise."
+        tests:
+          - not_null
+      - name: refund_amount
+        description: "Monetary refund issued."
+        tests:
+          - not_null
+      - name: restock_status
+        description: "Disposition status of the returned item."
+        tests:
+          - not_null
+      - name: return_timestamp
+        description: "Timestamp of return occurrence."
+        tests:
+          - not_null
+      - name: updated_at
+        description: "High-watermark timestamp for incremental processing."
+        tests:
+          - not_null
+      - name: dbt_loaded_at
+        description: "Audit timestamp of incremental ingestion."
+        tests:
+          - not_null
+
+  - name: fct_department_store_inventory
+    description: "Incremental marts fact table tracking stock movements, replenishment, and write-offs."
+    columns:
+      - name: movement_id
+        description: "Unique identifier of the stock movement event (Primary Key)."
+        tests:
+          - unique
+          - not_null
+      - name: store_id
+        description: "Store branch identifier."
+        tests:
+          - not_null
+      - name: department_name
+        description: "Department where the inventory change took place."
+        tests:
+          - not_null
+      - name: product_id
+        description: "Item SKU / identifier."
+        tests:
+          - not_null
+      - name: movement_type
+        description: "Action type (Receipt/Restock, Floor Replenishment, Damaged Write-off, etc.)."
+        tests:
+          - not_null
+      - name: quantity_change
+        description: "Inventory quantity delta."
+        tests:
+          - not_null
+      - name: movement_timestamp
+        description: "Timestamp when stock adjustment took place."
+        tests:
+          - not_null
+      - name: updated_at
+        description: "High-watermark timestamp for incremental processing."
+        tests:
+          - not_null
+      - name: dbt_loaded_at
+        description: "Audit timestamp of incremental ingestion."
+        tests:
+          - not_null
+
+  - name: fct_department_store_customer_loyalty
+    description: "Incremental marts fact table tracking customer loyalty rewards points and tier activity."
+    columns:
+      - name: loyalty_txn_id
+        description: "Unique identifier of the loyalty transaction (Primary Key)."
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: "Identifier of the loyalty program member."
+        tests:
+          - not_null
+      - name: sale_id
+        description: "Associated retail sale transaction ID."
+        tests:
+          - not_null
+      - name: store_id
+        description: "Store where points were earned or redeemed."
+        tests:
+          - not_null
+      - name: tier_level
+        description: "Customer loyalty tier level."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Classic', 'Silver', 'Gold', 'Platinum']
+      - name: points_earned
+        description: "Points earned from purchase."
+        tests:
+          - not_null
+      - name: loyalty_timestamp
+        description: "Timestamp when points were credited/debited."
+        tests:
+          - not_null
+      - name: updated_at
+        description: "High-watermark timestamp for incremental processing."
+        tests:
+          - not_null
+      - name: dbt_loaded_at
+        description: "Audit timestamp of incremental ingestion."
+        tests:
+          - not_null
